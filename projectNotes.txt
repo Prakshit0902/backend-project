@@ -1,0 +1,14 @@
+-->.gitkeep is something opposite to .gitignore and is used to push empty folders 
+--> the prettier configuration push the code with the configuration given in .prettierrc
+--> nodemon module is used for hot reloading (whenever there is any change in files it auto reloads the server)
+--> install the dotenv for managing the env variables
+
+--> Using the constants.js for the constants which are system specific like PORTS , DB_NAME
+--> using the index.js for database connection using mongoose
+--> using the app.js for express app
+
+
+
+--> "Database is Always in different Continent" so always there will be some delay in process so always wrap the connection code in try-catch
+and async - await
+
