@@ -1,8 +1,3 @@
-// require('dotenv').config({path : './env'}) but this degrades consistency of code but there is no issue in code
-// to fix the above issue we can just add import statement and changing the package.json file 
-// by adding some commands in the scripts tag which are as 
-// dev : nodemon src/index.js  ---> dev : nodemon -r dotenv/config --experimental-json-modules src/index.js
-// 
 import dotenv from "dotenv"
 
 import {connectDB} from "./db/index.js"
@@ -12,6 +7,31 @@ dotenv.config({
 })
 
 connectDB()
+.then(() => {
+    app.listen(process.env.PORT || 8000, () =>{
+        console.log("Server is running ");
+        
+    })
+})
+.catch((error) => {
+    console.log(error);
+    
+}) 
+
+
+// require('dotenv').config({path : './env'}) but this degrades consistency of code but there is no issue in code
+// to fix the above issue we can just add import statement and changing the package.json file 
+// by adding some commands in the scripts tag which are as 
+// dev : nodemon src/index.js  ---> dev : nodemon -r dotenv/config --experimental-json-modules src/index.js
+// 
+
+
+
+
+
+
+
+
 
 
 // method 1
