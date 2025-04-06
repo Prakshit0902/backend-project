@@ -5,6 +5,8 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
+import mongoose from "mongoose";
+
 import jwt from "jsonwebtoken"
 
 
@@ -262,14 +264,15 @@ const updateAccountDetails = asyncHandler(async (req,res) => {
     // for updating the files we should use a different controller with endpoint
     const {fullname,username,email} = req.body
 
-    if (!fullname || !email){
+    if (!fullname || !email || !username){
         throw new ApiError(400,"All fields are required")
     }
 
     const user = await User.findByIdAndUpdate(req.user?._id,{
         $set : {
             fullname,
-            email : email
+            email : email,
+            username : username
         }
     },{
         new : true
@@ -470,7 +473,7 @@ const getWatchHistory = asyncHandler (async (req,res) => {
                             from : "user",
                             localField : "owner",
                             foreignField : "_id",
-
+                            as : "owneduser",
                             pipeline : [
                                 {
                                     // the owner will also be a user but only with these fields rather than being of 
