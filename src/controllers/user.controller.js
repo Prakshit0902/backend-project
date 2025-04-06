@@ -455,8 +455,50 @@ const getWatchHistory = asyncHandler (async (req,res) => {
                 // we are using the _id hence it is done this way only 
                 _id : new mongoose.Types.ObjectId(req.user?._id)
             }
+        },
+        {
+            $lookup : {
+                from : "videos",
+                localField : "watchHistory",
+                foreignField: "_id",
+                as : "watchHistory",
+
+                // nested pipeline
+                pipeline : [
+                    {
+                        $lookup : {
+                            from : "user",
+                            localField : "owner",
+                            foreignField : "_id",
+
+                            pipeline : [
+                                {
+                                    // the owner will also be a user but only with these fields rather than being of 
+                                    // multiple fields as defined in user.models.js
+                                    $project : {
+                                        fullname : 1,
+                                        username : 1,
+                                        avatar : 1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields : {
+                            owner : {
+                                $first : "$owner"
+                            }
+                        }
+                    }
+                ]
+            }
         }
     ])
+
+    return res.status(200).json(
+        new ApiResponse(200,user[0].watchHistory,"Watch History fetched successfully")
+    )
 })
 
 export {loginUser}
@@ -469,3 +511,4 @@ export {updateAccountDetails}
 export {updateUserAvatar}
 export {updateUserCoverImage}
 export {getUserChannelProfile}
+export {getWatchHistory}
