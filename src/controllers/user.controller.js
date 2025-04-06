@@ -346,6 +346,119 @@ const updateUserCoverImage = asyncHandler(async (req,res) => {
 })
 
 
+const getUserChannelProfile = asyncHandler(async (req,res) => {
+    // we are taking the the username from the url hence using the params
+    const {username} = req.params
+
+    if (!username?.trim){
+        throw new ApiError(400,"username is missing")
+    }
+
+    // await User.find({username}) we can find the document from here also 
+    // instead we can use aggregation pipeline from here 
+
+    // we will get arrays in return from the aggregate pipeline
+    const channel = await User.aggregate([
+        // these are pipelines here
+        {
+            // so instead of finding user as above we could do it here in a place using the match   
+            $match : {
+                username : username?.toLowerCase()
+            }
+        },
+        {
+            // lookup pipeline is basically the left join of sql which takes certain parameters to join
+            $lookup : {
+                // here we take the name of the table from where we want to join
+                // the model we exported was Subscriptions but here using subscriptions as 
+                // the mongoose changes the name of the model to lowercase and to plural
+                from : "subscriptions",
+                // local field is what is the joining column called in this document
+                localField : "_id",
+                // foreign field is what the joining column called in the field we have to join from 
+                // we will count the number of subscribers by counting the channel from the documents  
+                foreignField : "channel",
+                // how will the new field named as so subscribers
+                as : "subscribers"
+            }
+        },
+        {
+            // this is next pipeline in which we will count how many channel user subscribed
+            $lookup : {
+                from : "channel",
+                localField : "_id",
+                foreignField : "subscription",
+                as : "subscribedTo"
+            }
+
+        },
+        {
+            // add fields pipeline adds the new additional fields added to the document 
+            $addFields : {
+                subscribersCount : {
+                    // using $ for the fields
+                    $size : "$subscribers"
+                },
+                channelSubscribedToCount : {
+                    $size : "$subscribedTo"
+                },
+                isSubscribed : {
+                    $cond : {
+                        // checks the condition that whether this user is in the subscribers document or not 
+                        // so condition consists of three things 1st is if,then,else
+                        if : {
+                            $in : [req.user?._id,"$subscribers.subscriber"]
+                        },
+                        then :true,
+                        else : false
+                    }
+                } 
+            }
+        },
+        {
+            // this pipeline projection 
+            $project : {
+                // here we give which fields we want to project
+                username : 1,
+                fullname : 1,
+                email : 1,
+                avatar : 1,
+                coverImage : 1,
+                channelSubscribedToCount : 1,
+                isSubscribed : 1,
+                subscribersCount : 1
+            }
+        }
+    ])
+
+    if (!channel?.length){
+        throw new ApiError(404,"Channel doesn't exist")
+    }
+
+    console.log(channel)
+
+    return res.status(200).json(
+        new ApiResponse(200,channel[0],"User channel fetched successfully")
+    )
+})
+
+const getWatchHistory = asyncHandler (async (req,res) => {
+    const user = await User.aggregate([
+        // is mongo db _id we get a string which on seen on the atlas is seen as ObjectId('alkdfjasjf') so the 
+        // string is obtained through _id 
+        {
+            $match : {
+                // _id : req.user?._id this line will not work as expected as here the code will not go through mongoose
+                // mongoose will not work here it will be sent directly 
+                // as mongoose behind the scene fetches the ObjectId('') instead of just string and thats what we want
+                // before we were using username for matching in the pipeline but here 
+                // we are using the _id hence it is done this way only 
+                _id : new mongoose.Types.ObjectId(req.user?._id)
+            }
+        }
+    ])
+})
+
 export {loginUser}
 export {logOutUser}
 export {registerUser}
@@ -355,3 +468,4 @@ export {getCurrentUser}
 export {updateAccountDetails}
 export {updateUserAvatar}
 export {updateUserCoverImage}
+export {getUserChannelProfile}
