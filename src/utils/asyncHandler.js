@@ -3,12 +3,14 @@
  *so we make the wrapper for this in the utils folder where we take the function 
  *and make the generalize function 
  *whenver we need to execute the function we will pass the functions in this method and return after executing the function
+ 
+ *whenever there is any async call we will use this handler to avoid using the try-catch block everywhere improving the code readability
 */
 
 // using the promise also we can do it 
 
 const asyncHandler = (requestHandler) => {
-    (req,res,next) => {
+    return (req,res,next) => {
         Promise.resolve(requestHandler(req,res,next)).catch((err) => {
             next(err)
         })

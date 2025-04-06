@@ -7,8 +7,14 @@
 --> using the index.js for database connection using mongoose
 --> using the app.js for express app
 
-
+--> whenever exporting a object if default exported then we can import using our own name also 
 
 --> "Database is Always in different Continent" so always there will be some delay in process so always wrap the connection code in try-catch
 and async - await
 
+
+--> access token are usually short lived and refresh token is long lived 
+--> until and unless you have access token you can use authentication services for e.g updating the db 
+--> but as the access token are short lived and after the expiry the user have to again login with credentials so to avoid this 
+--> we use refresh token which will be stored in the db and user will also have it so whenever the endpoint is hit it will check whether 
+the refresh token of user and db are matching and hence will authorize the user without re entering the credentials in a short duration     

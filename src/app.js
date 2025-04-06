@@ -31,4 +31,17 @@ app.use(express.static("public"))
 
 // cookieParser is used for accessing and set cookies of the user's browser and only servers can use these cookies and access
 
+app.use(cookieParser())
+
+
+import userRouter from './routes/user.routes.js'
+
+// now as we are using the routes as middleware so instead of calling direct app.get we use 
+// app.use() which is used for middlewares
+// we are using userRouter as middleware
+
+app.use("/api/v1/users",userRouter)
+
+// http://localhost:8000/api/v1/users
+
 export {app}
